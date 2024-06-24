@@ -29,7 +29,7 @@ public:
     }  
   
     // 如果需要，还可以实现其他纯虚函数，如logVerbose等  
-};  
+};
 
 int main(int argc, char const *argv[])
 {
@@ -55,6 +55,8 @@ int main(int argc, char const *argv[])
     const int INPUT_W = 816;
     // 创建自定义日志记录器的实例  
     MyLogger logger;
+
+    cudaStream_t stream = nullptr;
     
     Deeplab deeplab(trtPath,logger); 
     std::cout << "声明一个deeplab类" << std::endl; 
@@ -105,12 +107,12 @@ int main(int argc, char const *argv[])
     //     {
     //         std::cout << mydata[c] << std::endl;
     //     }    
-    std::cout << "input_index" << input_index << std::endl; //1
+    std::cout << "input_index" << input_index << std::endl; 
     deeplab.inference(mydata,CHANNEL * INPUT_H * INPUT_W * sizeof(float),input_index);
     // delete[] mydata;
 
     return 0;
-}
+};
 
 
 

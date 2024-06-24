@@ -13,11 +13,24 @@
 using namespace nvinfer1;
 using namespace InferEngine;
 
+#define checkRuntime(call) check_runtime(call, #call, __LINE__, __FILE__)
+
+bool __inline__ check_runtime(cudaError_t e, const char *call, int line, const char *file)
+{
+    if (e != cudaSuccess)
+    {
+        std::fprintf(stderr, "CUDA Runtime error %s # %s, code = %s [ %d ] in file %s:%d\n", call, cudaGetErrorString(e), cudaGetErrorName(e), e, file, line);
+        return false;
+    }
+    return true;
+}
 
 class Deeplab
 {
 public:
-    Deeplab(std::string model_path, nvinfer1::ILogger &logger){};//构造函数
+    Deeplab(std::string model_path, nvinfer1::ILogger &logger){
+        cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
+    }
 
     ~Deeplab()
     {
@@ -164,6 +177,13 @@ public:
 
         }
 
+    // void xInfer::CopyFromDeviceToHost(const float* output, int size, int bindIndex, const cudaStream_t& stream)
+    //     {
+    //         CUDA_CHECK(cudaMemcpyAsync(output, mBinding[bindIndex], size, cudaMemcpyDeviceToHost, stream));
+    //         CUDA_CHECK(cudaStreamSynchronize(stream));
+    //         //mLogger->log(Severity::kINFO, "API: CopyFromDeviceToHost will be deprecated soon, try to use GetBindingPtr");
+    //     }
+
     void* GetBindingPtr(const std::string& tensor_name) const
         {
             int idx = GetBindingIndex(tensor_name);
@@ -180,7 +200,24 @@ public:
         auto ms1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start);
         std::cout << "推理: " << (ms1 / 1000.0).count() << "ms" << std::endl;
 
-        int output_index = GetBindingIndex("output");
-        std::cout << "output_index: " << output_index << std::endl;
+        float* output = (float*)GetBindingPtr("output"); // 指针
+        std::cout << "get output "<< std::endl;
+
+        std::vector<std::vector<int>> COLOR_MAP{
+        {120, 120, 120}, {180, 120, 120}, {6, 230, 230},   {80, 50, 50}};
+
+        // cv::Mat map(612, 816, CV_8UC3);
+        // for (size_t i = 0; i < 612; i++) {
+        // for (size_t j = 0; j < 816; j++) {
+        //     int cls_id = output[i * 816 + j];
+        //     std::cout << "cls_id "<< cls_id << std::endl;
+        //     if (cls_id == 1){
+        //     // printf("cls_id %d\n",cls_id);}
+        //     map.at<cv::Vec3b>(i, j) = cv::Vec3b(
+        //         COLOR_MAP[cls_id][2], COLOR_MAP[cls_id][1], COLOR_MAP[cls_id][0]);
+        // }
+        // }
+        // }
+        // cv::imwrite("_cv_trt.jpg", map);
     }
 };
