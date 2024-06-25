@@ -74,27 +74,28 @@ int main(int argc, char const *argv[])
     float std[] = {58.395, 57.12, 57.375};
 
     // convert nhwc layout to nchw
-    for (int h = 0; h < INPUT_H; h++)
-    {
-        for (int w = 0; w < INPUT_W; w++)
-        {
-            cv::Vec3f &pixel = img_resized.at<cv::Vec3f>(h, w);  
-            pixel[0] = (pixel[0] - mean[0]) / std[0];  
-            pixel[1] = (pixel[1] - mean[1]) / std[1];  
-            pixel[2] = (pixel[2] - mean[2]) / std[2];  
-        }
-    }
+    // for (int h = 0; h < INPUT_H; h++)
+    // {
+    //     for (int w = 0; w < INPUT_W; w++)
+    //     {
+    //         cv::Vec3f &pixel = img_resized.at<cv::Vec3f>(h, w);  
+    //         pixel[0] = (pixel[0] - mean[0]) / std[0];  
+    //         pixel[1] = (pixel[1] - mean[1]) / std[1];  
+    //         pixel[2] = (pixel[2] - mean[2]) / std[2];  
+    //     }
+    // }
 
     // 提前申请内存，可节省推理时间
     static float mydata[BATCH_SIZE * CHANNEL * INPUT_H * INPUT_W];
     for (int r = 0; r < INPUT_H; r++)
     {
-        float* rowData = img_resized.ptr<float>(r);
+        
         for (int c = 0; c < INPUT_W; c++)
         {
-            mydata[0 * INPUT_H * INPUT_W + r * INPUT_W + c] = rowData[CHANNEL * c];
-            mydata[1 * INPUT_H * INPUT_W + r * INPUT_W + c] = rowData[CHANNEL * c + 1];
-            mydata[2 * INPUT_H * INPUT_W + r * INPUT_W + c] = rowData[CHANNEL * c + 2];
+            cv::Vec3b &pixel = img_resized.at<cv::Vec3b>(r, c);  
+            mydata[0 * INPUT_H * INPUT_W + r * INPUT_W + c] = (pixel[0] - mean[0]) / std[0];  
+            mydata[1 * INPUT_H * INPUT_W + r * INPUT_W + c] = (pixel[1] - mean[1]) / std[1];  
+            mydata[2 * INPUT_H * INPUT_W + r * INPUT_W + c] = (pixel[2] - mean[2]) / std[2];  
         }
     }
     std::cout << "图片已转换" << std::endl; 
