@@ -34,7 +34,7 @@ public:
 
     ~Deeplab()
     {
-        cudaFree(stream);
+
         int nb_bindings = engine->getNbBindings();
         for (int i = 0; i < nb_bindings; i++)
         {
@@ -44,6 +44,7 @@ public:
                 safeCudaFreeHost(mBinding[i]);
             }
         }
+        cudaSteamDestroy(stream);
 
     }
 
