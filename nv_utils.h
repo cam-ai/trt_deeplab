@@ -125,7 +125,7 @@ inline void safeCudaFreeHost(void* deviceMem)
 {
     if (deviceMem != nullptr)
     {
-        CUDA_CHECK(cudaFree(deviceMem));
+        CUDA_CHECK(cudaFreeHost(deviceMem));
         deviceMem = nullptr;
     }
 }
